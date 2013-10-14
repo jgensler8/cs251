@@ -1,0 +1,15 @@
+CC=gcc
+EXEC=./a.out
+COMFLAG=-DGENERIC
+
+build: test.c seq.c seq.h
+	$(CC) -c seq.c $(COMFLAG)
+	$(CC) test.c seq.o $(COMFLAG)
+
+clean:
+	rm -f *.o core
+
+rebuild: clean build
+
+debug: clean build
+	valgrind --leak-check=yes $(EXEC)
