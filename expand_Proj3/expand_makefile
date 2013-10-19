@@ -1,0 +1,13 @@
+CC=gcc
+
+line.o_: line.h line.c
+	$(CC) -c line.c
+
+hmap.o_: hmap.h hmap.c
+	$(CC) -c hmap.c
+
+clean:
+	rm -f *.o a.out
+
+build: clean expand.c hmap.o_ line.o_
+	$(CC) expand.c hmap.o line.o
