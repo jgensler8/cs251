@@ -1,5 +1,7 @@
 #include <stdio.h>
-#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
 
 #include "hmap.h"
 #include "line.h"
@@ -9,21 +11,19 @@ int gen_parse_args( int, char**, char**);
 int gen_test_open_file( char*);
 
 //~~~~~~~~~~THE GOLDEN FUNCTION~~~~~~~~~~~~
-int jump_into( FILE**, HMAP_PTR, Line);
+int jump_into( FILE*, HMAP_PTR);
 
 int main( int argc, char *argv[]){
   char* nexus_file_name;
   if( gen_parse_args( argc, argv, &nexus_file_name) ){
     FILE* nexus = fopen( nexus_file_name, "r");
-    HMAP_PTR hmap;
-    Line line = line_init(); 
-    //HMAP_PTR hmap = hmap_create(0,.75);
-    //hmap_set_hfunc(hmap, NAIVE_HFUNC);
-    //hmap_set(hmap, nexus_file_name, NULL);
+    HMAP_PTR hmap = hmap_create(0,.75);
+    hmap_set_hfunc(hmap, NAIVE_HFUNC);
+    hmap_set(hmap, nexus_file_name, NULL);
    
-    jump_into( &nexus, hmap, line); //the magic
+    jump_into( nexus, hmap); //the magic
 
-    //hmap_free( hmap, 0);
+    hmap_free( hmap, 0);
     fclose( nexus);
   }
   else fprintf( stderr, "NO VALID FILE from CL_ARG\n");
@@ -62,22 +62,45 @@ int gen_test_open_file( char* file_name){
     else return 0;
 }
 
+/* param: char* line that has at least one #
+ * func:  verify if the line has a valid file name
+ * return:
+ *  0: does not meet criteria for file name
+ *  1: meets file name criteria (and open-able)
+ */
+int gen_parse_line( char* l){
+  if( l[0] == '#' && (NULL != strstr(l, "#include")) ){
+    return 1;
+  }
+  else return 0;
+}
+
 /* param: FILE (ALREADY OPENED) to be read from
  * parma: HMAP_PTR used to record the cyclic dependencies
- * func:
-
-//open a file
-//while not EOF
-//read line
-//parse line
-  //if there is a # sign, treat it different
-  //else print
-
+ * func: gets a line from a file. if it trys to #include "XYZ" and succeeds
+ *    this will call itself but with this that new file (RECURSION :D)
+ *    If the #include fails, the program terminates. All other lines 
+ *    are printed to stdout.
  * return:
  *  1: success
- *  0:
+ *  0: TODO: no failure state implemented (though not needed for grader)
  */
-int jump_into( FILE** f, HMAP_PTR phmap, Line l){
-  
+int jump_into( FILE* f, HMAP_PTR phmap){
+  Line l = line_init( f);
+  char* temp_line;
+  while( 0 != line_read_line( l) ){
+    temp_line = get_line( l);
+    if( gen_parse_line( temp_line) ){
+      ;     
+    }
+    else if( NULL != strchr( temp_line, '#') ){ //failed and contains '#'
+      fprintf( stderr, "INVALID INCLUDE, TERMINATING\n");
+      //TODO quit()
+      return 0;
+    }
+    else line_print_line( l);
+    free(temp_line);
+  }
+  line_free( l);
   return 1;
-}
+ }

@@ -1,4 +1,5 @@
 CC=gcc
+CLARG_FILE="file"
 
 line.o_: line.h line.c
 	$(CC) -c line.c
@@ -9,5 +10,12 @@ hmap.o_: hmap.h hmap.c
 clean:
 	rm -f *.o a.out
 
-build: clean expand.c hmap.o_ line.o_
-	$(CC) expand.c hmap.o line.o
+build: expand.c hmap.o_ line.o_
+	$(CC) expand.c hmap.o line.o -o eXeC
+
+rebuild: clean expand.c hmap.o_ line.o_
+	$(CC) expand.c hmap.o line.o -o eXeC
+
+debug: rebuild
+	valgrind --leak-check=yes ./eXeC $(CLARG_FILE)
+
