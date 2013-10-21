@@ -1,44 +1,62 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "mutex_ll.h"
 
-#define DEFAULT_SIZE
-
-typedef struct mutex_array_struct{
-  Node* vals;
-} *Mutex_arr;
-
+/*
+ * STACK
+ * LIFO
+ */
 typedef struct node_struct{
   struct node_struct *next;
-  char* val;
+  char val;
 } Node;
 
-/* func: allocate the space and initalize a mutex_arr
+typedef struct mutex_ll_struct{
+  Node* head;
+} *Mutex_ll;
+
+/* func: allocate the space and initalize a mutex_ll
  * ret: a pointer to this space;
  */
-Mutex_arr mutex_arr_init(){
-  //TODO: malloc struct 
+Mutex_ll Mutex_ll_init(){
+  Mutex_ll ret = malloc( sizeof(struct mutex_ll_struct));
+  ret->head = NULL;
   return ret;
 }
 
-/* param: mutex_arr to free
+/* param: mutex_ll to free
  * func: free mutex_arr's members and "body"
  */
-void mutex_arr_free( Mutex_arr m){
-  //TODO: add linked list free
+void Mutex_ll_free( Mutex_ll m){
+  Node* hopper = m->head;
+  Node* temp;
+  while( hopper != NULL){
+    temp = hopper;
+    hopper = hopper->next;
+    free(temp);
+  }
   free(m);
 }
 
-/* param: Mutex_arr
- * func: grow Mutex_arr's vals and free old space;
+/* param: Mutex_ll
+ * func: append a Node to the ll; 
  * ret: pointer to the char of storage
  */
-int mutex_add_empty( Mutex_arr m){
-  //TODO: errthang
+char* Mutex_ll_grow( Mutex_ll m){
+  Node* add = malloc( sizeof( Node) );
+  add->val = '\0';
+  add->next = m->head;
+  m->head = add;
+  return &(add->val);
 }
 
-/*
- *
+/* param: Mutex_ll
+ * func: remove the first node of the list
  */
-int get_next( Mutex_arr m){
-  return mutex_add_empty( Mutex_arr m);
+void Mutex_ll_remove( Mutex_ll m){
+  Node* temp = m->head;
+  if( m->head != NULL){
+    m->head = m->head->next;
+    free(temp);
+  }
 }

@@ -92,7 +92,3 @@ char* get_line( Line l){
   strcpy( ret, l->line);
   return ret;
 }
-
-LINE* get_FILE( Line l){
-  return l->FILE;
-}

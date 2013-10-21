@@ -5,6 +5,7 @@
 
 #include "hmap.h"
 #include "line.h"
+#include "mutex_ll.h"
 
 // GENERAL FUNCTIONS
 int gen_parse_args( int, char**, char**);
@@ -13,7 +14,7 @@ int gen_test_open_file( char*);
 char* get_file_name( char*);
 
 //~~~~~~~~~~THE GOLDEN FUNCTION~~~~~~~~~~~~
-int jump_into( FILE*, HMAP_PTR);
+int jump_into( FILE*, HMAP_PTR, Mutex_ll);
 
 int main( int argc, char *argv[]){
   char* nexus_file_name;
@@ -21,12 +22,18 @@ int main( int argc, char *argv[]){
     FILE* nexus = fopen( nexus_file_name, "r");
     HMAP_PTR hmap = hmap_create(0,.75);
     hmap_set_hfunc(hmap, NAIVE_HFUNC);
-    hmap_set(hmap, nexus_file_name, NULL);
-   
-    jump_into( nexus, hmap); //the magic
-
+    Mutex_ll LL = Mutex_ll_init();   
+    
+    char* val_hold = Mutex_ll_grow( LL);
+    *val_hold = 1;
+    hmap_set( hmap, nexus_file_name, val_hold );
+    //down the rabbit hole
+    jump_into( nexus, hmap, LL);
+    //out of the rabbit hole   
+ 
+    fclose(nexus);
     hmap_free( hmap, 0);
-    fclose( nexus);
+    Mutex_ll_free( LL);
   }
   else fprintf( stderr, "NO VALID FILE from CL_ARG\n");
   return 0;
@@ -87,6 +94,7 @@ int gen_is_include_line( char* l){
 
 /* param: FILE (ALREADY OPENED) to be read from
  * parma: HMAP_PTR used to record the cyclic dependencies
+`* param: Mutex_ll to keep track of the hmap's key's val (char)
  * func: gets a line from a file. if it trys to #include "XYZ" and succeeds
  *    this will call itself but with this that new file (RECURSION :D)
  *    If the #include fails, the program terminates. All other lines 
@@ -95,7 +103,7 @@ int gen_is_include_line( char* l){
  *  1: success
  *  0: TODO: no failure state implemented (though not needed for grader)
  */
-int jump_into( FILE* f, HMAP_PTR phmap){
+int jump_into( FILE* f, HMAP_PTR phmap, Mutex_ll LL){
   Line l = line_init( f);
   char* temp_line;
   while( 0 != line_read_line( l) ){
@@ -104,11 +112,17 @@ int jump_into( FILE* f, HMAP_PTR phmap){
       char* file_name = get_file_name( temp_line);
       if( gen_test_open_file( file_name) && //can be opened
           (NULL == hmap_get( phmap, file_name) || //never declared
-          1 != hmap_get( phmap, file_name )) ){ //if declared, not used
+          '1' != (char)*(char*)hmap_get( phmap, file_name )) ){//declared-used
         FILE* to_jump = fopen( file_name, "r");
-        printf("ABOUT TO SET THE CLIDDDFFFFFFFFFFFFFFFFFFF");
-        hmap_set( hmap_set, file_name, mutex_arr[get_next(mutex_arr)] );
-        jump_into( to_jump, phmap);
+        char* hold_val = Mutex_ll_grow( LL);
+        *hold_val = '1'; //bit of a hack
+        hmap_set( phmap, file_name, hold_val);
+        //DOWN THE RABBIT HOLE
+        jump_into( to_jump, phmap, LL);
+        //OUT OF THE RABBIT HOLE
+        hmap_remove( phmap, file_name);
+        Mutex_ll_remove( LL);
+        fclose( to_jump);
         free( file_name);
       }
       else{
