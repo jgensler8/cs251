@@ -13,8 +13,7 @@ clean:
 build: expand.c hmap.o_ line.o_
 	$(CC) expand.c hmap.o line.o -o eXeC
 
-rebuild: clean expand.c hmap.o_ line.o_
-	$(CC) expand.c hmap.o line.o -o eXeC
+rebuild: clean build
 
 debug: rebuild
 	valgrind --leak-check=yes ./eXeC $(CLARG_FILE)

@@ -8,3 +8,4 @@ extern int line_read_line( Line);
 extern void set_cur_size( Line);
 extern void line_print_line( Line );
 extern char* get_line( Line);
+extern FILE* get_FILE( Line);

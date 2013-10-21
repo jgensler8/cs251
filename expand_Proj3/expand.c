@@ -10,6 +10,8 @@
 int gen_parse_args( int, char**, char**);
 int gen_test_open_file( char*);
 
+char* get_file_name( char*);
+
 //~~~~~~~~~~THE GOLDEN FUNCTION~~~~~~~~~~~~
 int jump_into( FILE*, HMAP_PTR);
 
@@ -54,12 +56,13 @@ int gen_parse_args( int argc, char**argv, char** nexus_file_name){
  *  0: passed param can't be opened in read mode
  */
 int gen_test_open_file( char* file_name){
-    FILE *test_opener = fopen( file_name, "r");
-    if( test_opener != NULL){
-      fclose( test_opener);
-      return 1;
-    }
-    else return 0;
+  FILE *test_opener = fopen( file_name, "r");
+  if( test_opener != NULL){
+    fclose( test_opener);
+    return 1;
+  }
+  else printf("FAILED TO OPEN FILE, DANG");
+  return 0;
 }
 
 /* param: char* line that has at least one #
@@ -68,11 +71,18 @@ int gen_test_open_file( char* file_name){
  *  0: does not meet criteria for file name
  *  1: meets file name criteria (and open-able)
  */
-int gen_parse_line( char* l){
-  if( l[0] == '#' && (NULL != strstr(l, "#include")) ){
-    return 1;
+int gen_is_include_line( char* l){
+  if( NULL != strchr( l, '#')){ //attempted include statment
+    if( l[0] == '#' && (NULL != strstr(l, "#include")) ){
+      //TODO
+      return 1;
+    }
+    else{
+      fprintf( stderr, "INVALID INCLUDE, TERMINATING\n");
+      abort();
+    }
   }
-  else return 0;
+  else return 0; //good 'ol line
 }
 
 /* param: FILE (ALREADY OPENED) to be read from
@@ -90,13 +100,21 @@ int jump_into( FILE* f, HMAP_PTR phmap){
   char* temp_line;
   while( 0 != line_read_line( l) ){
     temp_line = get_line( l);
-    if( gen_parse_line( temp_line) ){
-      ;     
-    }
-    else if( NULL != strchr( temp_line, '#') ){ //failed and contains '#'
-      fprintf( stderr, "INVALID INCLUDE, TERMINATING\n");
-      //TODO quit()
-      return 0;
+    if( gen_is_include_line( temp_line) ){
+      char* file_name = get_file_name( temp_line);
+      if( gen_test_open_file( file_name) && //can be opened
+          (NULL == hmap_get( phmap, file_name) || //never declared
+          1 != hmap_get( phmap, file_name )) ){ //if declared, not used
+        FILE* to_jump = fopen( file_name, "r");
+        printf("ABOUT TO SET THE CLIDDDFFFFFFFFFFFFFFFFFFF");
+        hmap_set( hmap_set, file_name, mutex_arr[get_next(mutex_arr)] );
+        jump_into( to_jump, phmap);
+        free( file_name);
+      }
+      else{
+        fprintf(stderr, "BAD FILE NAME || CYCLIC DEPENDENCY, TERMINATING\n");
+        abort();
+      }   
     }
     else line_print_line( l);
     free(temp_line);
@@ -104,3 +122,18 @@ int jump_into( FILE* f, HMAP_PTR phmap){
   line_free( l);
   return 1;
  }
+
+/* param: a line that contains a file name surrounded by double quotes
+ * func: create a deep copy of file name
+ * return: deep copy of file name
+ */
+char* get_file_name( char* line_chunk){
+  char* first = strchr( line_chunk, '\"');
+  char* second = strchr( first+1, '\"'); //"hop" over the first double quote
+  //they are sizeof(char) spaced
+  int size = (second-first)/sizeof(char); 
+  char* ret = malloc( (size)*sizeof(char) ); // room for null terminator
+  strncpy( ret, first+1, size); //"hop" opver double quote
+  ret[size-1] = '\0'; //manually assign null terminator
+  return ret;
+}
