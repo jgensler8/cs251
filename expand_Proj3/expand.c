@@ -114,14 +114,20 @@ int jump_into( FILE* f, HMAP_PTR phmap, Mutex_ll LL){
           (NULL == hmap_get( phmap, file_name) || //never declared
           '1' != (char)*(char*)hmap_get( phmap, file_name )) ){//declared-used
         FILE* to_jump = fopen( file_name, "r");
-        char* hold_val = Mutex_ll_grow( LL);
-        *hold_val = '1'; //bit of a hack
-        hmap_set( phmap, file_name, hold_val);
+        if( !hmap_contains( phmap, file_name) ){
+          char* hold_val = Mutex_ll_grow( LL);
+          *hold_val = '1';
+          hmap_set( phmap, file_name, hold_val);
+        }
+        else{
+          char* hold_val = hmap_get( phmap, file_name);
+          *hold_val = '1';
+        }
         //DOWN THE RABBIT HOLE
         jump_into( to_jump, phmap, LL);
         //OUT OF THE RABBIT HOLE
-        hmap_remove( phmap, file_name);
-        Mutex_ll_remove( LL);
+        char* holder = hmap_get( phmap, file_name);
+        *holder = '0';
         fclose( to_jump);
         free( file_name);
       }
