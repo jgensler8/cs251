@@ -82,16 +82,16 @@ int gen_test_open_file( char* file_name){
  *  1: meets file name criteria (and open-able)
  */
 int gen_is_include_line( char* l){
-  char* temp = strchr( l, '#');
   if( NULL != strchr( l, '#')){ //attempted include statment
-   if( strlen(l) >= 12 && l[0] == '#' && NULL != strstr(l, "#include") &&
+    if( strlen(l) >= 12 && l[0] == '#' && NULL != strstr(l, "#include") &&
           0 != isspace( (int)l[8])){
-      temp = NULL;
+      char* temp = NULL;
       int counter,  times_found = 0, first_quote_flag = 0;
-      for( counter = 8; counter < strlen( l)-1; ++counter){
+      for( counter = 8; counter < strlen( l); ++counter){
+        printf("TEMP:%d:\n", *temp);
         temp = l + counter;
         if( *temp == '\"') first_quote_flag = 1;
-        if( first_quote_flag == 0 && isspace((int)*temp) == 0){
+        if( first_quote_flag == 0 && isspace(temp) != 1){
           fprintf( stderr, "INVALID INCLUDE, TERMINATING 2\n");
           abort();
         }
@@ -108,6 +108,7 @@ int gen_is_include_line( char* l){
       return 0;
     }
     else{
+     printf(":%d:%d:%d:%d:", strlen(l) >= 12, l[0] == '#',NULL != strstr(l, "#include"), 0 != isspace( (int)l[8]) );
       fprintf( stderr, "INVALID INCLUDE, TERMINATING 1\n");
       abort();
     }
