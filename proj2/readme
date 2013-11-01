@@ -1,0 +1,9 @@
+Jeff Gensler ~ jgensl2@uic.edu
+CS251
+
+I have submitted a generic mode implementation.
+The compare funcation is assumed to return:
+
+pos val (1) when A > B
+neg val (-1) when A < B
+zero (0) when A == B

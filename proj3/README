@@ -1,0 +1,33 @@
+I have included a make file name "expand_makefile"
+
+it depends on three .c files:
+  1: mutex_ll.c
+  2: line.c
+  3: hmap.c
+
+simply run
+  make -f expand_makefile build
+  ./eXeC
+OR
+  (FOR USE WITH VALGRIND)
+  make -f expand_makefile build
+  make -f expand_makefile debug
+
+
+there are several test files in the directory
+
+file
+ |
+ |- list 1
+ |  |
+ |  |- list 2
+ |
+ |-list 2
+ |
+ |-cyclic1 (optional)
+ |  |
+ |  |-cyclic2
+ |     |
+ |     |-...etc...
+ |
+ |

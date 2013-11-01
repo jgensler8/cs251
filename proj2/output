@@ -1,0 +1,9 @@
+rm -f *.o core
+gcc -c seq.c -DGENERIC
+gcc test.c seq.o -DGENERIC
+valgrind --leak-check=yes ./a.out
+after filter (fourth):
+after filter (tseq):
+abcasdfasdf
+jtqwtrqwrear
+doddddddddreymi
