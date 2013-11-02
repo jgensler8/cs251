@@ -1,0 +1,15 @@
+CC=gcc
+EXEC=a.out
+
+graph.o_: graph.h graph.c
+	$(CC) -c graph.c
+
+build: graph.o_
+	$(CC) test.c graph.o -o $(EXEC)
+
+debug: build
+	valgrind ./$(EXEC)
+
+clean:
+	rm ./*.o ./$(EXEC)
+
