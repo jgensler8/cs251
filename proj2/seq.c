@@ -40,13 +40,13 @@ extern Seq seq_create(){
 *  RUNTIME:  O(n)
 */
 extern void seq_free(Seq seq){
-    Node *temp; //create a placeholder
-    while( seq->head != NULL){
-	temp = seq->head; //assign the  placeholder
-	seq->head = seq->head->fw; //move forward
-	free( temp); //delete the "head" (placeholder)
-    }
-    free(seq);
+  Node *temp; //create a placeholder
+  while( seq->head != NULL){
+  	temp = seq->head; //assign the  placeholder
+  	seq->head = seq->head->fw; //move forward
+  	free( temp); //delete the "head" (placeholder)
+  }  
+  free(seq);
 }
 
 /**
@@ -86,21 +86,20 @@ extern int seq_size(Seq seq){
 * RUNTIME REQ: O(1)
 */
 extern void seq_add_front(Seq seq, ETYPE val){
-    Node* front;
-    front = (Node*)malloc(sizeof(Node) );
-    front->a = val;
-    if( seq_size(seq) >= 1){ //at least one node (head and tail exist)
-	front->fw = seq->head; //point the new front to the list
-	seq->head->bw = front; //point the "old" front to the new front
-    }
-    else{ //the seq has 0 elems; front is both "front" and "end"
-	seq->head = front;
-	seq->tail = front;
-	front->fw = NULL;
-    }
-    front->bw = NULL;
-    seq->head = front;
-    ++(seq->numN); //reflect addition of new node
+  Node* front;
+  front = (Node*)malloc(sizeof(Node) );
+  front->a = val;
+  if( seq_size(seq) >= 1){ //at least one node (head and tail exist)
+	  front->fw = seq->head; //point the new front to the list
+	  seq->head->bw = front; //point the "old" front to the new front
+  }
+  else{ //the seq has 0 elems; front is both "front" and "end"
+	  seq->tail = front;
+	  front->fw = NULL;
+  }
+  front->bw = NULL;
+  seq->head = front;
+  ++(seq->numN); //reflect addition of new node
 }
 
 /**
@@ -123,7 +122,7 @@ extern ETYPE seq_del_front(Seq seq){
     ETYPE holder = seq->head->a;
     //even if one node, should set head to null;
     seq->head = seq->head->fw;
-    seq->head->bw = NULL;
+    if( seq->head != NULL) seq->head->bw = NULL;
     free(nodehold);
     --(seq->numN);
     return holder;
@@ -166,13 +165,13 @@ extern ETYPE seq_del_back(Seq seq){
     }
     Node* nodehold = seq->tail;
     if( seq_size(seq) == 1){
-	seq->head = NULL;	
+	    seq->head = NULL;	
     } 
     //if the list is at least 2 big, the head will not change
     ETYPE holder = seq->tail->a;
     //even if one node, should set tail to null
     seq->tail = seq->tail->bw;
-    seq->tail->fw = NULL;
+    if( seq->tail != NULL) seq->tail->fw = NULL;
     free(nodehold);
     --(seq->numN);
     return holder;

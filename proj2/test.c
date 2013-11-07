@@ -17,25 +17,16 @@ int cmp( ETYPE x, ETYPE y){
 }
 
 int main(){
-    int test[5] = {1, 2, 3, 4};
-    //char *test[] = {"abcasdfasdf", "jtqwtrqwrear", "doddddddddreymi"};
+    //int test[5] = {1, 2, 3, 4};
+    char *test[] = {"abcasdfasdf", "jtqwtrqwrear", "doddddddddreymi"};
     Seq tseq;
     tseq = seq_create();
     seq_add_front( tseq, test[2]);
-    seq_add_front( tseq, test[1]);
-    seq_add_front( tseq, test[0]);
-
-    Seq fourth = seq_clone( tseq);
-    Seq last = seq_concat( tseq, fourth);
-
-    Seq jar = seq_filter_eq( last, cmp, 2);
-    seq_print( jar, printInt);
-printf("not filtered:\n");
-    seq_print( last, printInt);
-//array test
-
-    free( tseq);
-    free( fourth);
-    seq_free( last);
+    seq_print( tseq, printString);
+    seq_del_back( tseq);
+    seq_del_back( tseq);
+    seq_print( tseq, printString);
+    
+seq_free( tseq);
     return 0;
 }
