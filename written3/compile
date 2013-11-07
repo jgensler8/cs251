@@ -1,0 +1,12 @@
+#!/bin/bash
+#compile hw to pdf
+compile(){
+  file=hw3
+  latex $file.tex
+  dvipdf $file.dvi $file.pdf
+}
+
+clean(){
+  file=hw3
+  rm $file.log $file.dvi $file.pdf $file.aux
+}
