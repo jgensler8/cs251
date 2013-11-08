@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=latex 2013.11.3)  7 NOV 2013 15:53
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=latex 2013.11.3)  8 NOV 2013 06:35
 entering extended mode
  %&-line parsing enabled.
 **hw3.tex
@@ -22,8 +22,7 @@ File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 \abovecaptionskip=\skip41
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
-)
-No file hw3.aux.
+) (./hw3.aux)
 \openout1 = `hw3.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 2.
@@ -42,28 +41,27 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 32.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 32.
-[1
+ [1
 
 ]
-Overfull \hbox (3.00552pt too wide) in paragraph at lines 66--66
-\OT1/cmr/bx/n/12 ad-ja-cency list genereated for any node would be empty. 
- []
+Overfull \vbox (21.028pt too high) has occurred while \output is active []
 
-[2]
+
+[2] [3]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 75.
+(Font)              <12> on input line 73.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 75.
+(Font)              <8> on input line 73.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 75.
- [3] (./hw3.aux) ) 
+(Font)              <6> on input line 73.
+ [4] (./hw3.aux) ) 
 Here is how much of TeX's memory you used:
- 225 strings out of 495062
- 2356 string characters out of 1182644
- 50022 words of memory out of 3000000
+ 227 strings out of 495062
+ 2372 string characters out of 1182644
+ 50053 words of memory out of 3000000
  3481 multiletter control sequences out of 15000+50000
  6991 words of font info for 25 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
  23i,4n,20p,1562b,118s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on hw3.dvi (3 pages, 6416 bytes).
+Output written on hw3.dvi (4 pages, 6296 bytes).
