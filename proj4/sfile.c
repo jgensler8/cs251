@@ -1,4 +1,5 @@
-#include <iostream>
+#include <stdlib.h>
+#include "sfile.h"
 
 typedef struct file_data_struct{
   char* fileName;
@@ -14,7 +15,6 @@ typedef struct seen_file_struct{
   int numTargets;
 } *sFile;
 
-/****** sFile fxs *************/
 /* func:  allocate space to sfile
  * ret:   initialized sfile
  */
@@ -24,6 +24,7 @@ sFile sFile_init(){
   sfile->numFiles = 0;
   sfile->target = NULL;
   sfile->targetFile = 0;
+  return sfile;
 }
 
 /* param: sFile, to be freed
@@ -47,6 +48,7 @@ void sFile_free( sFile sfile){
  */
 void sFile_add_file( sFile sfile, char* fileName){
   //copy old stuff
+  fdata* copy = (fdata*)malloc( (sfile->numFiles+1)*sizeof( fdata) );
   //add new stuff
 }
 
@@ -58,5 +60,3 @@ void sFile_add_target( sFile sfile, char* fileName){
   //copy old stuff
   //add new stuff
 }
-
-
