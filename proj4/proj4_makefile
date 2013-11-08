@@ -1,0 +1,8 @@
+CC=gcc
+EXEC=a.out
+
+build:
+	gcc test.c -o $(EXEC)
+
+clean:
+	rm ./* EXEC
