@@ -11,7 +11,7 @@ b: 2 acyclic paths a-d, a-b-c-d\newline
 c: a,e\newline
 d: f,c\newline
 e: a-b-f-a, a-b-c-d-e-f-a, b-c-d-e-b, a-d-e-f-a\newline
-f: f-a-b-f-a-b-f (3 of this)(could be f-a-b-f)
+f: f-a-b-f-a-b-f (3 of this)(could be f-a-b-f), a-b-c-d-e-b-f-a (5 of this)(could be upper loop for a,f,b and lower loop for b,c,d,e), d-e-f-a-b-f-a-d (4 of this)(start with a,b,e,f)
 }
 
 \setcounter{section}{9}
@@ -57,12 +57,10 @@ Saginov\newline
 \setcounter{section}{1}
 \setcounter{subsection}{2}
 \subsection{
-If my answer is TRUE, I must show that: for every shorest path tree, this case must hold\newline
+If my answer is TRUE, I must show that: for every shorest path tree, there exists an adjacency list that corresponds exactly to this tree\newline
 If my answer is FALSE, I must show that: a counter example exists, namely there exists at least one representation of an adjacency list that does not yield a shortest path tree run from s.\newline
 The answer is TRUE\newline
-Starting small: suppose a graph with no edges. The adjacency list genereated for any node would be empty.\newline
-Now, suppose a graph with an arbitrary amount of edges, but none include the source vertex. again, the adjacency list is empty because the source vertex does not point to any node nor does it point to itself\newline
-Finally, suppose that s points to an arbitrary positive non-zero amount of nodes. Based on the BFS algorithm, the neighbors of s will populate the shortest path's tree. Whether or not this tree finds itself to the desired node is beside the point. Since BFS CAN use an adjacency list representation, the realistic success of this method is dependent on the programmer.
+For a shortest path tree to be created, there must be edges connecting nodes. The edges are stored in the adjacency list. BFS utilizes these edges to do its job. No edges equals no BFS, which is the expected outcome. Because BFS must take a step by step approach, the ordering of the edges matters and a construction of a shortest path because of this order can yeild unique DBFS trees.
 }
 
 \newpage
