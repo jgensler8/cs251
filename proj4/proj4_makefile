@@ -1,8 +1,23 @@
 CC=gcc
 EXEC=a.out
 
-build:
-	gcc test.c -o $(EXEC)
+graph.o_: graph.c graph.h
+	$(CC) -c graph.c -o graph.o
+
+hmap.o_: hmap.c hmap.h
+	$(CC) -c hmap.c -o hmap.o
+
+fdata.o_: fdata.c fdata.h
+	$(CC) -c fdata.c -o fdata.o
+
+line.o_: line.c line.h
+	$(CC) -c line.c -o line.o
+
+build: graph.o_ hmap.o_ fdata.o_ line.o_  main.c
+	gcc main.c graph.o hmap.o fdata.o line.o -o $(EXEC)
 
 clean:
 	rm ./* EXEC
+
+debug: clean build
+	valgrind ./$(EXEC)
