@@ -3,7 +3,11 @@ util.c
 stk.g
 stk.c
 main.c
-util.o : util.h util.c
-stk.o : stk.h stk.c
-app : main.c stk.o util.o
+test1 : main.c
+util.o    util.h util.c
+stk.o  stk.h stk.c
+app  main.c stk.o util.o
+
+
+
 

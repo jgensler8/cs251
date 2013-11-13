@@ -270,3 +270,21 @@ int* graph_dfs( Graph g, int start){
 int graph_get_size( Graph g){
   return g->maxSize;
 }
+
+/*
+// some sample functions
+void print_arr( int* array, int n, int from){
+  int i;
+  for( i=0; i < n; ++i){
+    fprintf( stdout, "%d-->%d\t== %d\n", from, i, array[i]);
+  }
+}
+
+void graph_dfs_display( Graph g, int from, int* (*dfs_fx)(Graph, int),
+    void (*print_arr_fx)(int*, int, int) ){
+  int* array = dfs_fx( g, from);
+  int size = graph_get_size( g);
+  print_arr_fx( array, size, from);
+  free( array);
+}
+*/
