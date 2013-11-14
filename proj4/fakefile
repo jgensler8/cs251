@@ -1,13 +1,8 @@
-util.h
-util.c
-stk.g
-stk.c
-main.c
-test1 : main.c
-util.o : util.h util.c
-stk.o : stk.h stk.c
-app : main.c stk.o util.o
-
-
+a
+b
+c
+a
+b
+c
 
 

@@ -64,8 +64,6 @@ make -f proj4_makefile build
 ./a.out <fakefile_name>
 OR
 make -f proj4_makefile clean
-OR
-make -f proj4_makefile debug <fakefile_name>
 
 ~~~~~~~~~~~~~~~~~~NOTES~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This program is pretty memory hungry (to keep track of the files)

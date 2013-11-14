@@ -125,8 +125,11 @@ int is_valid_line( char* name){
  * param: char*, target line
  * func:  store target and dependencies in HMAP,
  *        abort if target is already declared
+ * ret:
+ *    0: failure evaluating
+ *    1: success evaluating
  */
-void evaluate_target( Agg_Data AD, char* start){
+int evaluate_target( Agg_Data AD, char* start){
   start = strtok( start, " \t");
   char* name = start;
   Fdata fdata = fdata_init( name);
@@ -142,16 +145,21 @@ void evaluate_target( Agg_Data AD, char* start){
   }
   else{
     fprintf(stderr,"ERROR, REDEFINITION OF TARGET!\n");
-    abort();
+    fdata_free( fdata);
+    return 0;
   } 
   agg_data_add_fdata( AD, fdata);
+  return 1;
 }
 
 /* param: HMAP_PTR
  * param: char*, basic line
  * func:  store the basic file in the hmap
+ * ret:
+ *    0: failure evaluating
+ *    1: success evaluating
  */
-void evaluate_basic( Agg_Data AD, char* start){
+int evaluate_basic( Agg_Data AD, char* start){
   Fdata fdata = fdata_init( start); 
   start = strtok( start, " \t");
   while( start == NULL)
@@ -159,9 +167,11 @@ void evaluate_basic( Agg_Data AD, char* start){
   //printf("basic:%s:\n", start);
   if( is_unique( AD, start)) agg_data_add_fdata( AD, fdata);
   else{
-    fprintf(stderr, "ERROR, BASIC FILE NAME EXISTS");
-    abort();
+    fprintf(stderr, "ERROR, BASIC FILE NAME EXISTS\n");
+    fdata_free( fdata);
+    return 0;
   }
+  return 1;
 }
 
 /* param: Agg_Data
@@ -169,18 +179,26 @@ void evaluate_basic( Agg_Data AD, char* start){
  * func:  read the fake make file,
  *        store every file read in the table,
  *        abort if file is already entered
+ * ret:
+ *    0: failure evaluating
+ *    1: success evaluating
  */
-void gen_parse_file( Agg_Data AD, char* fileName){
+int gen_parse_file( Agg_Data AD, char* fileName){
   FILE* file = fopen( fileName, "r");
   Line l = line_init( file);
+  int no_errors = 1;
 
   line_read_line( l);
   char* chunk = get_line( l);
   while( chunk != NULL){ //reading lines from fakefile
     gen_swap_first( &chunk, '\n', '\0');
     if( is_valid_line( chunk) ){
-      if( is_target(chunk) ) evaluate_target( AD, chunk);
-      else evaluate_basic( AD, chunk);
+      if( is_target(chunk) ){
+        if( !evaluate_target( AD, chunk) ) no_errors = 0;
+      }
+      else{
+        if( !evaluate_basic( AD, chunk) ) no_errors = 0;
+      }
     }
     free(chunk);
     if( !line_read_line( l) ) break; //EOF
@@ -189,139 +207,20 @@ void gen_parse_file( Agg_Data AD, char* fileName){
 
   line_free( l);
   fclose( file);
-}
-
-/*************** QUEUE FXS ********************/
-
-typedef struct node_struct{
-  struct node_struct *next;
-  int val;
-} Node;
-
-typedef struct queue_struct{
-  Node* front;  // [front] <-- [..node..] <-- [back]
-  Node* back;
-} *Queue;
-
-/* param: Int, size to make int array
- * func: initialize a queue
- * ret: initialized Queue
- */
-Queue queue_init( int n){
-  Queue ret = malloc( sizeof( struct queue_struct) );
-  ret->front = NULL;
-  ret->back = NULL;
-  return ret;
-}
-
-/* param: Queue 
- * func:  deallocate memory associated with the Queue
- */
-void queue_free( Queue q){
-  Node *hopper = q->back, *toremove;
-  while( hopper != NULL){
-    toremove = hopper;
-    hopper = hopper->next;
-    free( toremove);
-  }
-  free( q);
-}
-
-/* param: Queue
- * func:  check if queue is empty
- * ret:
- *    0: the Queue is not empty
- *    1: the Queue is empty
- */
-int queue_is_empty( Queue q){
-  return q->back == NULL ? 1 : 0;
-}
-
-/* param: Queue
- * func:  print the contents of the queue
- */
-void queue_print( Queue q){
-  fprintf( stdout, "HERE IS THE QUEUE:\n");
-  Node* hopper = q->back;
-  while( hopper != NULL){
-    fprintf( stdout, ":%d:\n", hopper->val);
-    hopper = hopper->next;
-  }
-  fprintf( stdout, "\n");
-}
-
-/* param: Queue, to push to
- * param: int, val to push
- * func: place the val at the end of the queue
- */
-void queue_enqueue( Queue q, int val){
-  Node* temp = (Node*)malloc( sizeof( Node));
-  temp->val = val;
-  temp->next = NULL;
-  if( queue_is_empty( q) ){
-    q->front = temp;
-    q->back = temp;
-  }
-  else{
-    temp->next = q->back;
-    q->back = temp;
-  }
-}
-
-/* param: Queue, to push to
- * func: pop the first val from the front
- *       illustration for else{}
- *       hopper V      V front
- *              [] --> [] --> NULL
- * ret:
- *    -1: invalid value
- *    otherwise: poppped integet (always posistive)
- */
-int queue_dequeue( Queue q){
-  if( queue_is_empty( q) ) return -1;
-  else{ // >= 1 node (not empty)
-    int ret = q->front->val;
-    if( q->back->next == NULL){ //one node
-      free( q->front);
-      q->front = NULL;
-      q->back = NULL;
-    }
-    else{ // > 1 node
-      Node* hopper = q->back, *realFront;
-      while( hopper->next->next != NULL) hopper = hopper->next;
-      realFront = hopper->next;
-      free( realFront);
-      q->front = hopper;
-      hopper->next = NULL;
-    }
-    return ret;
-  }
+  return no_errors;
 }
 
 /****************** CMD FXS *******************/
-/* param: Agg_Data
- * func:  determine if the map contains any cycles (namely back edges)
- * ret:
- *    0: not valid, contains cycles
- *    1: valid
- */
-int is_valid_map( Agg_Data AD){
-  //DFS with back edge
-  //uses flags
-}
-
 /*
  *
  */
 char* cmd_parse_line( char** line){
   char* chunk = strtok( *line, "\t ");
   chunk = strtok(NULL, "\t ");
-  printf("chunk3:%s:\n", chunk);
-  //chunk = strtok(NULL, "\t "); //skip over the command
-  //printf("chunk3:%s:\n", chunk);
-  //while( chunk == NULL) chunk = strtok( NULL, "\t ");
-  gen_swap_first( &chunk, '\n', '\0');
-  printf("chunk3:%s:\n", chunk);
+  if( chunk != NULL){
+    gen_swap_first( &chunk, '\n', '\0');
+    //printf("chunk:%s:\n", chunk);
+  }
   return chunk;
 }
 
@@ -338,7 +237,7 @@ void cmd_time( Agg_Data AD){
  */
 void cmd_touch( char* line, Agg_Data AD){
   char* chunk = cmd_parse_line( &line);
-  if( hmap_contains( AD->hmap, chunk) ){
+  if( chunk != NULL && hmap_contains( AD->hmap, chunk) ){
     set_time_stamp( (Fdata)hmap_get(AD->hmap, chunk), AD->clock);
     ++AD->clock;
   }
@@ -351,7 +250,7 @@ void cmd_touch( char* line, Agg_Data AD){
  */
 int cmd_timestamp( char* line, Agg_Data AD){
   char* chunk = cmd_parse_line( &line);
-  if( hmap_contains( AD->hmap, chunk) ){
+  if( chunk != NULL && hmap_contains( AD->hmap, chunk) ){
     return get_time_stamp( (Fdata)hmap_get( AD->hmap, chunk) );
   }
   else printf("Sorry, that file doesn't exist1\n");
@@ -379,9 +278,14 @@ void cmd_timestamps( Agg_Data AD){
  *        only update timestamps if needed
  *        (if the build requires no updating, nothing will change)
  */
+int get_child_ts( char* fileName, Agg_Data AD){
+  return 1;
+}
 void cmd_make( char* line, Agg_Data AD){
-  //probs want to use helper
-  //recurse through the files, updating when needed (++clock)
+  char* chunk = cmd_parse_line( &line);
+  if( chunk != NULL) get_child_ts( chunk, AD);
+  else printf("Sorry, you didn't specify a file to build\n");
+  //set all flags to zero
 }
 
 /************** main **********************/ 
@@ -393,11 +297,10 @@ int main(int argc, char** argv){
   gen_parse_args( argc, argv, &fileName);
   if( fileName == NULL) fprintf( stderr, "NO VALID FILE CLARG SUPPLIED\n");
   else{
-    gen_parse_file( aggdata, fileName);
-    if( !is_valid_map(aggdata) ){
-      printf("ERROR BUILDING\n");
-      abort();
-    }
+    if( !gen_parse_file( aggdata, fileName) )
+      fprintf(stderr, "ERROR PARSING\n");
+    else if( !is_valid_map(aggdata->hmap, aggdata->files, aggdata->numFdata) )
+      fprintf(stderr, "ERROR BUILDING\n");
     else{
       Line line = line_init( stdin);
       while(quit){
