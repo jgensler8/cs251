@@ -47,15 +47,13 @@ line.c / line.h
   Pulling a line from a file (like stdin)
 
 main.c
-  Four Parts:
+  Three Parts:
   1)  Agg_Data Fxs
       stores a hmap, array of files from the fakefile (and number),
       and clock
-  2)  Queue Fxs
-      For use with the searching techniques (tentative)
-  3)  Gen Fxs
+  2)  Gen Fxs
       odd ball functions and general purpose utilities
-  4)  cmd Fxs
+  3)  cmd Fxs
       functions relating to the user input
       
 

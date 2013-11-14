@@ -99,11 +99,17 @@ int get_time_stamp( Fdata fdata){
 }
 
 /* param: Fdata
- * param: int
- * func:  set Fdata's flag to the passed int
+ * ret:   Fdata's numDepends
  */
-void set_flag( Fdata fdata, int n){
-  fdata->timeStamp = n;
+int get_num_depends( Fdata fdata){
+  return fdata->numDepends;
+}
+
+/* param: Fdata
+ * ret:   a pointer to the 2d arr of dependencies
+ */
+char** get_depends_on( Fdata fdata){
+  return fdata->dependsOn;
 }
 
 
@@ -118,15 +124,14 @@ void set_flag( Fdata fdata, int n){
  *    0: no bad edge (good)
  *    1: has bad edge (bad)
  */
-//SHALLOW COPY? TODO
 int has_bad_edge( char* filename, HMAP_PTR hmap, Fdata* files, int numFData){
-  printf("filename:%s:\n", filename);
+  //printf("filename:%s:\n", filename);
   if( hmap_contains( hmap, filename) ){
     Fdata Curfile = hmap_get( hmap, filename);
     Curfile->flag = 1;
     int i;
     for( i=0; i<Curfile->numDepends; ++i){ //for every dependency
-      printf("CHECKING DEPEND:%s:\n", Curfile->dependsOn[i]);
+     // printf("CHECKING DEPEND:%s:\n", Curfile->dependsOn[i]);
       Fdata depends = (Fdata)hmap_get( hmap, (Curfile->dependsOn)[i] );
       if(depends->flag == 1) return 1; //back edge
       if( has_bad_edge( (Curfile->dependsOn)[i], hmap, files, numFData) ) return 1;
@@ -135,7 +140,7 @@ int has_bad_edge( char* filename, HMAP_PTR hmap, Fdata* files, int numFData){
     return 0;
   }
   else{ //file never existed
-    printf("ERROR, file doesn't exist\n");
+    fprintf(stderr, "ERROR, file doesn't exist\n");
     return 1;
   }
 }
@@ -149,7 +154,7 @@ int has_bad_edge( char* filename, HMAP_PTR hmap, Fdata* files, int numFData){
 int is_valid_map( HMAP_PTR hmap, Fdata* files, int numFdata){
   int is_valid = 1, i;
   for( i=0; i<numFdata; ++i){
-    printf("HasBadEdge:%s:\n", files[i]->fileName);
+    //printf("HasBadEdge:%s:\n", files[i]->fileName);
     if( has_bad_edge( files[i]->fileName, hmap, files, numFdata ) ){
       is_valid = 0;
       break; //if invalid, no need to keep looking
@@ -159,8 +164,11 @@ int is_valid_map( HMAP_PTR hmap, Fdata* files, int numFdata){
   return is_valid;
 }
 
-/*
- *
+/* param: Fdata*, the Fdata's to change
+ * param: int, number of Fdata's
+ * param: int, target
+ * param: int, change target to this
+ * func:  replace all targets with the replacement 
  */
 int set_flag_all( Fdata* files, int numFdata, int from, int to){
   int i;

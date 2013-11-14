@@ -246,15 +246,16 @@ void cmd_touch( char* line, Agg_Data AD){
 
 /* param: line, to parse
  * param: Agg_Data
+ * param: int, flag: 0->don't print, 1->print
  * func:  print the timestamp of the specified file
  */
-int cmd_timestamp( char* line, Agg_Data AD){
+void cmd_timestamp( char* line, Agg_Data AD){
   char* chunk = cmd_parse_line( &line);
   if( chunk != NULL && hmap_contains( AD->hmap, chunk) ){
-    return get_time_stamp( (Fdata)hmap_get( AD->hmap, chunk) );
+    printf("%s :%d\n", chunk,
+        get_time_stamp( (Fdata)hmap_get( AD->hmap, chunk) ) );
   }
   else printf("Sorry, that file doesn't exist1\n");
-  return -1;
 }
 
 /* param: line, to parse
@@ -277,15 +278,30 @@ void cmd_timestamps( Agg_Data AD){
  * func:  simulate a build with a specified source vertex,
  *        only update timestamps if needed
  *        (if the build requires no updating, nothing will change)
+ *        file flag states:
+ *        0: not visited
+ *        1: visited, currently expanding
+ *        2: visited, done expanding
  */
 int get_child_ts( char* fileName, Agg_Data AD){
+  Fdata Cur = (Fdata)hmap_get( AD->hmap, fileName), Dep;
+  set_time_stamp( Cur, 1);  
+  int numDepends = get_num_depends( Cur), i;
+  char** depends = get_depends_on( Cur);
+  for( i=0; i<numDepends; ++i){
+    Dep = (Fdata)hmap_get( AD->hmap, depends[i]);
+    if( 0 == get_time_stamp( Dep) ) get_child_ts( depends[i], AD);
+    else if( 1 == get_time_stamp( Dep) ) printf("UHOH!!!!\n");
+    else printf("Don't need to expand\n");
+  }  
   return 1;
 }
 void cmd_make( char* line, Agg_Data AD){
   char* chunk = cmd_parse_line( &line);
   if( chunk != NULL) get_child_ts( chunk, AD);
   else printf("Sorry, you didn't specify a file to build\n");
-  //set all flags to zero
+  set_flag_all( AD->files, AD->numFdata, 2, 0);
+  set_flag_all( AD->files, AD->numFdata, 1, 0);
 }
 
 /************** main **********************/ 
