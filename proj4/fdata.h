@@ -6,3 +6,5 @@ extern void fdata_add_dep( Fdata, char*);
 extern char* get_name( Fdata);
 extern int sizeof_fdata();
 extern void fdata_print( Fdata);
+extern void set_time_stamp( Fdata, int);
+extern int get_time_stamp( Fdata);

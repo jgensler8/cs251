@@ -82,3 +82,18 @@ void fdata_print( Fdata fdata){
   for(i=0; i<fdata->numDepends; ++i)
     printf("\t%d: %s\n", i, (fdata->dependsOn)[i]);
 }
+
+/* param: Fdata
+ * param: int
+ * func:  set Fdata's timestamp to the passed int
+ */
+void set_time_stamp( Fdata fdata, int n){
+  fdata->timeStamp = n;
+}
+
+/* param: Fdata
+ * ret:   Fdata's timestamp
+ */
+int get_time_stamp( Fdata fdata){
+  return fdata->timeStamp;
+} 

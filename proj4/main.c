@@ -54,7 +54,7 @@ void agg_data_add_fdata( Agg_Data AD, Fdata fdata){
   AD->files = bigger;
   bigger[ AD->numFdata - 1] = fdata;
   char* name = get_name( fdata);
-  hmap_set( AD->hmap, name, &fdata );
+  hmap_set( AD->hmap, name, fdata );
   free( name);
 }
 
@@ -82,9 +82,9 @@ void gen_parse_args( int argc, char** argv, char** fileName){
  * func: replace the first instance of the target with the replacement
  */
 void gen_swap_first( char** line, char target, char dest){
-  char *holder;
+  char *holder = NULL;
   holder = strchr( *line, target);
-  *holder = dest;
+  if( holder != NULL) *holder = dest;
 }
 
 /* param: char*
@@ -94,7 +94,7 @@ void gen_swap_first( char** line, char target, char dest){
  *    1: line refers to target line
  */
 int is_target( char* line){
-  return NULL == strchr( line, (int)':') ? 0 : 1;
+  return NULL == strchr( line, ':') ? 0 : 1;
 }
 
 /* param: char*, target line
@@ -130,14 +130,13 @@ void evaluate_target( Agg_Data AD, char* start){
   start = strtok( start, " \t");
   char* name = start;
   Fdata fdata = fdata_init( name);
-  printf("target:%s:\n", start);
+  //printf("target:%s:\n", start);
   if( is_unique( AD, start) ){
     start = strtok(NULL, " \t");
     start = strtok(NULL, " \t");
     while( NULL != start){
-      printf("depends:%s:\n", start);
+      //printf("depends:%s:\n", start);
       fdata_add_dep( fdata, start);
-      fdata_print( fdata);
       start = strtok(NULL, " \t");
     }
   }
@@ -157,7 +156,7 @@ void evaluate_basic( Agg_Data AD, char* start){
   start = strtok( start, " \t");
   while( start == NULL)
     start = strtok( NULL, " \t");
-  printf("BASIC:%s:\n", start);
+  //printf("basic:%s:\n", start);
   if( is_unique( AD, start)) agg_data_add_fdata( AD, fdata);
   else{
     fprintf(stderr, "ERROR, BASIC FILE NAME EXISTS");
@@ -314,12 +313,15 @@ int is_valid_map( Agg_Data AD){
 /*
  *
  */
-cmd_parse_line( char** line){
-  strtok( *line, " \t");
-  char* chunk = strtok( line, "\t ");
-  strtok(NULL, "\t ");
-  while( chunk == NULL) chunk = strtok( NULL, "\t ");
-  printf("chunk:%s:\n", chunk);
+char* cmd_parse_line( char** line){
+  char* chunk = strtok( *line, "\t ");
+  chunk = strtok(NULL, "\t ");
+  printf("chunk3:%s:\n", chunk);
+  //chunk = strtok(NULL, "\t "); //skip over the command
+  //printf("chunk3:%s:\n", chunk);
+  //while( chunk == NULL) chunk = strtok( NULL, "\t ");
+  gen_swap_first( &chunk, '\n', '\0');
+  printf("chunk3:%s:\n", chunk);
   return chunk;
 }
 
@@ -335,10 +337,9 @@ void cmd_time( Agg_Data AD){
  * func:  update the timestamp of the specified file
  */
 void cmd_touch( char* line, Agg_Data AD){
-  // parse line for file name
-  char* chunk = gen_parse_line( &line);
+  char* chunk = cmd_parse_line( &line);
   if( hmap_contains( AD->hmap, chunk) ){
-    //set_time_stamp
+    set_time_stamp( (Fdata)hmap_get(AD->hmap, chunk), AD->clock);
     ++AD->clock;
   }
   else printf("Sorry, that file doesn't exist1\n");
@@ -349,12 +350,12 @@ void cmd_touch( char* line, Agg_Data AD){
  * func:  print the timestamp of the specified file
  */
 int cmd_timestamp( char* line, Agg_Data AD){
-  char* chunk = gen_parse_line( &line);
+  char* chunk = cmd_parse_line( &line);
   if( hmap_contains( AD->hmap, chunk) ){
-    //get_time_stamp( 
-    ++AD->clock;
+    return get_time_stamp( (Fdata)hmap_get( AD->hmap, chunk) );
   }
   else printf("Sorry, that file doesn't exist1\n");
+  return -1;
 }
 
 /* param: line, to parse
@@ -364,8 +365,11 @@ int cmd_timestamp( char* line, Agg_Data AD){
 void cmd_timestamps( Agg_Data AD){
   printf("TIMESTAMPS:\n");
   int i;
-  for( i=0; i<AD->numFdata; ++i)
-    ; //fdata_print_timestamp( (AD->files)[i] );
+  for( i=0; i<AD->numFdata; ++i){
+    char* name = get_name( (AD->files)[i] );
+    printf("%s: %d\n", name, get_time_stamp( (AD->files)[i] ) );
+    free(name);
+  }
   printf("\n");
 }
 
@@ -401,9 +405,9 @@ int main(int argc, char** argv){
         line_read_line( line);
         char* input = get_line( line);
         if( strstr(input, "quit") ) quit = 0;
-        else if( strstr(input, "time") ) cmd_time( aggdata);
         else if( strstr(input, "timestamps") ) cmd_timestamps( aggdata);
         else if( strstr(input, "timestamp") ) cmd_timestamp( input, aggdata);
+        else if( strstr(input, "time") ) cmd_time( aggdata);
         else if( strstr(input, "touch") ) cmd_touch( input, aggdata);
         else if( strstr(input, "make") ) cmd_make( input, aggdata);
         free( input);
