@@ -1,6 +1,6 @@
 a : b c
 b : d e
-c : f g
+c : f g b f g b
 f
 g
 d

@@ -286,30 +286,24 @@ void cmd_timestamps( Agg_Data AD){
 int get_child_ts( char* fileName, Agg_Data AD){
   Fdata Cur = (Fdata)hmap_get( AD->hmap, fileName), Dep;
   set_flag( Cur, 1);  
-  printf("Before:\n");
-  fdata_print( Cur);  
   int numDepends = get_num_depends( Cur), i, updateLater = 0;
   char** depends = get_depends_on( Cur);
   for( i=0; i<numDepends; ++i){
     Dep = (Fdata)hmap_get( AD->hmap, depends[i]);
-  printf("Dep:\n");
-  fdata_print( Dep);  
     if( get_time_stamp(Cur) < get_child_ts( depends[i], AD) )
       updateLater = 1;
-    else printf("UPDATE\n");
   }
   if( updateLater){
     set_time_stamp( Cur, AD->clock);
     ++AD->clock;
   }
-  printf("After:\n");
-  fdata_print( Cur);  
   return get_time_stamp( Cur);
 }
 void cmd_make( char* line, Agg_Data AD){
   char* chunk = cmd_parse_line( &line);
-  if( chunk != NULL) get_child_ts( chunk, AD);
-  else printf("Sorry, you didn't specify a file to build\n");
+  if( chunk != NULL && hmap_contains( AD->hmap, chunk))
+    get_child_ts( chunk, AD);
+  else printf("Sorry, you didn't specify a file OR the file doesn't exist\n");
   set_flag_all( AD->files, AD->numFdata, 2, 0);
   set_flag_all( AD->files, AD->numFdata, 1, 0);
 }
