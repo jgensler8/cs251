@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "hmap.h"
-#include "graph.h"
 #include "line.h"
 #include "fdata.h"
 
@@ -193,6 +192,114 @@ void gen_parse_file( Agg_Data AD, char* fileName){
   fclose( file);
 }
 
+/*************** QUEUE FXS ********************/
+
+typedef struct node_struct{
+  struct node_struct *next;
+  int val;
+} Node;
+
+typedef struct queue_struct{
+  Node* front;  // [front] <-- [..node..] <-- [back]
+  Node* back;
+} *Queue;
+
+/* param: Int, size to make int array
+ * func: initialize a queue
+ * ret: initialized Queue
+ */
+Queue queue_init( int n){
+  Queue ret = malloc( sizeof( struct queue_struct) );
+  ret->front = NULL;
+  ret->back = NULL;
+  return ret;
+}
+
+/* param: Queue 
+ * func:  deallocate memory associated with the Queue
+ */
+void queue_free( Queue q){
+  Node *hopper = q->back, *toremove;
+  while( hopper != NULL){
+    toremove = hopper;
+    hopper = hopper->next;
+    free( toremove);
+  }
+  free( q);
+}
+
+/* param: Queue
+ * func:  check if queue is empty
+ * ret:
+ *    0: the Queue is not empty
+ *    1: the Queue is empty
+ */
+int queue_is_empty( Queue q){
+  return q->back == NULL ? 1 : 0;
+}
+
+/* param: Queue
+ * func:  print the contents of the queue
+ */
+void queue_print( Queue q){
+  fprintf( stdout, "HERE IS THE QUEUE:\n");
+  Node* hopper = q->back;
+  while( hopper != NULL){
+    fprintf( stdout, ":%d:\n", hopper->val);
+    hopper = hopper->next;
+  }
+  fprintf( stdout, "\n");
+}
+
+/* param: Queue, to push to
+ * param: int, val to push
+ * func: place the val at the end of the queue
+ */
+void queue_enqueue( Queue q, int val){
+  Node* temp = (Node*)malloc( sizeof( Node));
+  temp->val = val;
+  temp->next = NULL;
+  if( queue_is_empty( q) ){
+    q->front = temp;
+    q->back = temp;
+  }
+  else{
+    temp->next = q->back;
+    q->back = temp;
+  }
+}
+
+/* param: Queue, to push to
+ * func: pop the first val from the front
+ *       illustration for else{}
+ *       hopper V      V front
+ *              [] --> [] --> NULL
+ * ret:
+ *    -1: invalid value
+ *    otherwise: poppped integet (always posistive)
+ */
+int queue_dequeue( Queue q){
+  if( queue_is_empty( q) ) return -1;
+  else{ // >= 1 node (not empty)
+    int ret = q->front->val;
+    if( q->back->next == NULL){ //one node
+      free( q->front);
+      q->front = NULL;
+      q->back = NULL;
+    }
+    else{ // > 1 node
+      Node* hopper = q->back, *realFront;
+      while( hopper->next->next != NULL) hopper = hopper->next;
+      realFront = hopper->next;
+      free( realFront);
+      q->front = hopper;
+      hopper->next = NULL;
+    }
+    return ret;
+  }
+}
+
+/****************** CMD FXS *******************/
 /* param: Agg_Data
  * func:  determine if the map contains any cycles (namely back edges)
  * ret:
@@ -202,6 +309,18 @@ void gen_parse_file( Agg_Data AD, char* fileName){
 int is_valid_map( Agg_Data AD){
   //DFS with back edge
   //uses flags
+}
+
+/*
+ *
+ */
+cmd_parse_line( char** line){
+  strtok( *line, " \t");
+  char* chunk = strtok( line, "\t ");
+  strtok(NULL, "\t ");
+  while( chunk == NULL) chunk = strtok( NULL, "\t ");
+  printf("chunk:%s:\n", chunk);
+  return chunk;
 }
 
 /* param: Agg_Data
@@ -217,19 +336,25 @@ void cmd_time( Agg_Data AD){
  */
 void cmd_touch( char* line, Agg_Data AD){
   // parse line for file name
-  // validate name
-  // use hmap to change timestamp
-  ++AD->clock;
+  char* chunk = gen_parse_line( &line);
+  if( hmap_contains( AD->hmap, chunk) ){
+    //set_time_stamp
+    ++AD->clock;
+  }
+  else printf("Sorry, that file doesn't exist1\n");
 }
 
 /* param: line, to parse
  * param: Agg_Data
  * func:  print the timestamp of the specified file
  */
-void cmd_timestamp( char* line, Agg_Data AD){
-  // parse line for file name
-  // validate name
-  // use hmap to find timestamp
+int cmd_timestamp( char* line, Agg_Data AD){
+  char* chunk = gen_parse_line( &line);
+  if( hmap_contains( AD->hmap, chunk) ){
+    //get_time_stamp( 
+    ++AD->clock;
+  }
+  else printf("Sorry, that file doesn't exist1\n");
 }
 
 /* param: line, to parse
