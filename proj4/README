@@ -1,0 +1,72 @@
+~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~~
+Jeffrey Gensler
+jgensl2@uic.edu
+github.com/jgensler8
+CS 251
+
+FAKEMAKE: create a crude 'make' program
+
+fakemake file contents
+Basic files:
+basic1
+basic2
+Target files:
+target1: basic1 basic2
+target2: target1 basic2
+
+file format:
+"
+basic1
+basic2
+target1 : basic1 basic2
+target2 : target1 basic2
+"
+OR
+"
+target1 : basic1 basic2
+target2 : target1 basic2
+basic1
+basic2
+"
+
+~~~~~~~~~~~~~~~~~~~~~~~CONTENTS~~~~~~~~~~~~~~~~~~~~~~
+hmap.c / hmap.h
+  A basic hash map
+  (key: filename, value Fdata struct)
+
+fdata.c / fdata.h
+  {
+  char* filename
+  int timestamp
+  int flag //to be used to detect cycles AND for makes
+  char** dependsOn
+  int numDepends
+  }
+
+line.c / line.h
+  Pulling a line from a file (like stdin)
+
+main.c
+  Four Parts:
+  1)  Agg_Data Fxs
+      stores a hmap, array of files from the fakefile (and number),
+      and clock
+  2)  Queue Fxs
+      For use with the searching techniques (tentative)
+  3)  Gen Fxs
+      odd ball functions and general purpose utilities
+  4)  cmd Fxs
+      functions relating to the user input
+      
+
+~~~~~~~~~~~~~~~COMPILATION~~~~~~~~~~~~~~~~~~~~~~~
+make -f proj4_makefile build
+./a.out <fakefile_name>
+OR
+make -f proj4_makefile clean
+OR
+make -f proj4_makefile debug <fakefile_name>
+
+~~~~~~~~~~~~~~~~~~NOTES~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This program is pretty memory hungry (to keep track of the files)
+Keep this in mind when grading.
