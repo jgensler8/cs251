@@ -78,6 +78,8 @@ int sizeof_fdata(){
 void fdata_print( Fdata fdata){
   printf("\nname: %s\n", fdata->fileName);
   printf("numDepends: %d\n", fdata->numDepends);
+  printf("timeStamp : %d\n", fdata->timeStamp);
+  printf("flag      : %d\n", fdata->flag);
   int i;
   for(i=0; i<fdata->numDepends; ++i)
     printf("\t%d: %s\n", i, (fdata->dependsOn)[i]);
@@ -112,6 +114,13 @@ char** get_depends_on( Fdata fdata){
   return fdata->dependsOn;
 }
 
+/* param: Fdata
+ * param: int
+ * func:  set Fdata's flag to int
+ */
+void set_flag( Fdata fdata, int val){
+  fdata->flag = val;
+}
 
  /* param: char*, filename
  * param: Agg_Data

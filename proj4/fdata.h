@@ -11,5 +11,6 @@ extern void set_time_stamp( Fdata, int);
 extern int get_time_stamp( Fdata);
 extern int get_num_depends( Fdata);
 extern char** get_depends_on( Fdata);
+extern void set_flag( Fdata, int);
 
 extern int is_valid_map( HMAP_PTR, Fdata*, int);

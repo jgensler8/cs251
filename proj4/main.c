@@ -285,16 +285,26 @@ void cmd_timestamps( Agg_Data AD){
  */
 int get_child_ts( char* fileName, Agg_Data AD){
   Fdata Cur = (Fdata)hmap_get( AD->hmap, fileName), Dep;
-  set_time_stamp( Cur, 1);  
-  int numDepends = get_num_depends( Cur), i;
+  set_flag( Cur, 1);  
+  printf("Before:\n");
+  fdata_print( Cur);  
+  int numDepends = get_num_depends( Cur), i, updateLater = 0;
   char** depends = get_depends_on( Cur);
   for( i=0; i<numDepends; ++i){
     Dep = (Fdata)hmap_get( AD->hmap, depends[i]);
-    if( 0 == get_time_stamp( Dep) ) get_child_ts( depends[i], AD);
-    else if( 1 == get_time_stamp( Dep) ) printf("UHOH!!!!\n");
-    else printf("Don't need to expand\n");
-  }  
-  return 1;
+  printf("Dep:\n");
+  fdata_print( Dep);  
+    if( get_time_stamp(Cur) < get_child_ts( depends[i], AD) )
+      updateLater = 1;
+    else printf("UPDATE\n");
+  }
+  if( updateLater){
+    set_time_stamp( Cur, AD->clock);
+    ++AD->clock;
+  }
+  printf("After:\n");
+  fdata_print( Cur);  
+  return get_time_stamp( Cur);
 }
 void cmd_make( char* line, Agg_Data AD){
   char* chunk = cmd_parse_line( &line);
