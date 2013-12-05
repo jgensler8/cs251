@@ -1,0 +1,33 @@
+
+
+For each of the TODOs below, select one of the following:
+
+    (i)  I completed it and am confident in correctness
+
+    (ii) I wrote code for it, but not sure it works all of
+         the time.
+
+    (iii)  Did not attempt / submit
+
+    Feel free to add any comments you feel are relevant to 
+    the grading process.
+
+
+(1) iterative version of insert
+
+(2) Modified data structures and necessary functions
+    to support bst_size in constant time.
+
+(3) Completed the post-order printing function enabling
+    visualization of the tree.
+
+(4) Completed bst_ith_smallest function
+
+(5) Completed bst_num_in_range function
+
+(6) Completed bst_extract_range function
+
+(7) Completed size-balanced capability (bonus)
+
+
+

@@ -1,0 +1,8 @@
+CC=gcc
+EXEC=a.out
+
+bst.o_: bst.h bst.c
+	$(CC) -c bst.c -o bst.o
+
+build: bst.o_ tst.c
+	$(CC) tst.c bst.o -o $(EXEC)

@@ -1,8 +1,8 @@
 CS251: Data Structures
 =====
 
-proj1:  sorting an input matrix     [2D array]
-proj2:  generic sequence structure  [doubly ll]
-proj3:  simulate preprocessor       [hash map]
-proj4:  simulate make file          [graph]
-
+proj1:  sorting an input matrix       [2D array]
+proj2:  generic sequence structure    [doubly ll]
+proj3:  simulate preprocessor         [hash map]
+proj4:  simulate make file            [graph]
+proj5:  binary search tree functions  [BST]
