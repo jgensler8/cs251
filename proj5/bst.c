@@ -60,6 +60,7 @@ void bst_free(BST_PTR t){
     free(t);
 }
 
+// we already know the value is not in the tree
 static NODE * insert(NODE *r, int x){
     NODE *leaf;
     if(r == NULL){
@@ -86,6 +87,7 @@ static NODE * insert(NODE *r, int x){
 
 // TODO
 // how about an iterative version?
+// we already know the value is not in the tree
 static NODE *insert_i(NODE *r, int x){
   //INSERT BEGIN
   // **** THIS FUNCITON ASSUMES THE INPUT DOESNT EXIST ****
@@ -125,6 +127,87 @@ static NODE *insert_i(NODE *r, int x){
 }
 
 
+
+
+//START SIZE BALANCE FUNCITONS
+
+//extract range at a given tree
+static void bst_extract_all_r( NODE* r, int *num, int** arr){
+  if( r == NULL) return;
+  else{ //if in range
+    (*arr)[ *num] = r->val;
+    ++(*num);
+    bst_extract_all_r( r->right, num, arr);
+    bst_extract_all_r( r->left, num, arr);
+  }
+}
+static int* bst_extract_all( NODE *r, int* num){
+  if( r == NULL){
+    fprintf(stderr, "ERROR, EMPTY TREE\n");
+    return NULL;
+  }
+  else{
+    int elems = 1 + r->sizeLeft + r->sizeRight;
+    int *array = (int*)malloc( elems*sizeof(int));
+    //printf("NUM %d\n", *num); //DEBUG
+    bst_extract_all_r( r, num, &array);
+    //printf("NUM %d\n", *num); //DEBUG
+    return array;
+  }
+}
+
+int int_compare( const void* A, const void* B){
+  int *a = (int*)A;
+  int *b = (int*)B;
+  if( *a < *b) return -1;
+  else if( *a > *b) return 1;
+  else return 0;
+}
+
+//return a new, balanced version of the passed subtree
+//will free old tree
+NODE* bst_fix_sb( NODE* start, int new_val){
+  //extract the array of elems
+  int size = 0, *array;
+  array = bst_extract_all( start, &size);
+  //sort the array
+  qsort( array, size, sizeof(int), int_compare);
+  //build the new tree from the array
+  NODE* newTree = from_arr( array, size);  
+  //free the array and old tree
+  free( array);
+  free_r( start);
+  //return new tree thereby replacing the old one
+  return newTree;
+}
+
+static NODE* bst_validate_r( NODE* r, int new_val){
+  if( r == NULL) return NULL;
+  //show the nodes values and you can verify that a branch is not SB
+  //printf("val %d: SL %d SR %d\n", r->val, r->sizeLeft, r->sizeRight);
+  if( r->sizeLeft > 2*r->sizeRight + 1
+    || r->sizeRight > 2*r->sizeLeft +1 ){
+    //printf("INSERTION OF %d = rebuild\n", new_val); //DEBUG
+    return bst_fix_sb( r, new_val);
+  }
+  else{
+    if( new_val > r->val){
+      r->right = bst_validate_r( r->right, new_val);
+    }
+    else if( new_val < r->val){
+      r->left =  bst_validate_r( r->left, new_val);
+    }
+    return r;
+  }
+}
+void bst_validate_sb( BST_PTR t, int new_val){
+  t->root = bst_validate_r( t->root, new_val);
+}
+//END SIZE BALANCE FUNCTIONS
+
+
+
+
 void bst_insert(BST_PTR t, int x){
   //INSERT BEGIN
   if( !bst_contains( t, x) ){
@@ -135,6 +218,7 @@ void bst_insert(BST_PTR t, int x){
     //   above.
     //t->root = insert(t->root, x); //OPTION 1 (recursive)
     t->root = insert_i(t->root, x); //OPTION 2 (iterative)
+    bst_validate_sb( t, x);
   }
   //INSERT END
 }
@@ -207,18 +291,19 @@ int sanity;
   }
   if(x < r->val){
     r->left = remove_r(r->left, x, success);
+    if( *success) --r->sizeLeft;
   }
   else {
     r->right = remove_r(r->right, x, success);
+    if( *success) --r->sizeRight;
   }
   return r;  // root unchanged
 
 }
-
-
 int bst_remove(BST_PTR t, int x){
     int success;
     t->root = remove_r(t->root, x, &success);
+  if( success) bst_validate_sb( t, x);
     return success;
 }
 
@@ -336,30 +421,32 @@ void bst_postorder(BST_PTR t){
 
 // ***************** FUNCTION INSERT BEGIN *****************
 int bst_i_r( NODE *r, int i){
-  //DEBUG
-  //printf("val ls rs %d %d %d\n",r->val, r->sizeLeft, r->sizeRight);
   if( r == NULL){
-    fprintf( stderr, "ERROR DELETING SMALLEST ELEMENT\n");
+    fprintf( stderr, "ERROR FINDING SMALLEST ELEMENT\n");
     return -1;
   }
   else{
-    if( r->sizeLeft == i ) return r->left->val; //found it
-    else if( i < r->sizeLeft ) //in the left tree
+    //DEBUG
+    //printf("val %d: LS %d RS %d\n",r->val, r->sizeLeft, r->sizeRight);
+    if( i <= r->sizeLeft ) //in the left tree
       return bst_i_r( r->left, i);
+    else if( r->sizeLeft + 1 == i )
+      return r->val; //found it
     else //in the right tree
-      return bst_i_r( r->right, i-r->sizeLeft);
+      return bst_i_r( r->right, i - 1 - r->sizeLeft);
   }
 }
 int bst_ith_smallest( BST_PTR t, int i){
-  if( t->root == NULL || i > (1 + t->root->sizeLeft + t->root->sizeRight)){ 
-    fprintf( stderr, "TREE EMPTY OR iTH NUMBER TOO LARGE\n");
+  if( t->root == NULL || i > (1 + t->root->sizeLeft + t->root->sizeRight)
+    || i < 0){ 
+    fprintf( stderr, "TREE EMPTY OR i TOO LARGE OR i TOO SMALL\n");
     return -1;
   }
   else
     return bst_i_r( t->root, i);
 }
 // END ith SMALLEST
-
+//*** VERSION 1 ***
 int bst_num_in_range_r( NODE* r, int low, int hi){
   if( r == NULL) return 0;
   else if( r->val <= hi && r->val >= low){ //if in range
@@ -373,51 +460,52 @@ int bst_num_in_range_r( NODE* r, int low, int hi){
     return bst_num_in_range_r( r->left, low, hi);
   }
 }
-// parent value
-int bst_num_in_range_r2( NODE* r, int low, int hi, int paVal){
+
+//*** VERSION 2 ***
+// count values greater than or equal to val
+int bst_num_gte( NODE* r, int val){
+  if( r == NULL) return 0;
+  else if( r->val < val ){ //right tree may have values
+    return bst_num_gte( r->right, val);
+  }
+  else if ( r->val > val){ //might be more vals to left
+    return 1 + r->sizeRight + bst_num_gte( r->left, val);
+  }
+  else return 1 + r->sizeRight; //r->val == val
+}
+// count values less than or equal to val
+int bst_num_lte( NODE* r, int val){
+  if( r == NULL) return 0;
+  else if( r->val > val ){ //left tree may have values
+    return bst_num_lte( r->left, val);
+  }
+  else if ( r->val < val){ //might be more vals to right
+    return 1 + r->sizeLeft + bst_num_lte( r->right, val);
+  }
+  else return 1 + r->sizeLeft; //r->val == val
+}
+int bst_num_in_range_r2( NODE* r, int low, int hi){
   if( r == NULL) return 0;
   else if( r->val < low){ //leftmost tree will never get expanded
-    return bst_num_in_range_r2( r->right, low, hi, r->val);
+    return bst_num_in_range_r2( r->right, low, hi);
   }
   else if(r->val > hi){ //rightmost tree will never get expanded
-    return bst_num_in_range_r2( r->left, low, hi, r->val);
+    return bst_num_in_range_r2( r->left, low, hi);
   }
   else{ // I am in the range
-    if( paVal <= hi && paVal >= low){ //my parent is in the rage
-      //don't need to traverse area between parent & me
-      if( r->val > paVal){ 
-        return 1 + r->sizeLeft
-          + bst_num_in_range_r2( r->right, low, hi, r->val);
-      }
-      else{ // im < parent
-        return 1 + r->sizeRight
-          + bst_num_in_range_r2( r->left, low, hi, r->val);
-      }
-    }
-    else{ //my parent is not in the range
-      //TODO CAN THIS BE OPTIMIZED?
-      return 1 + bst_num_in_range_r2( r->left, low, hi, r->val)
-          + bst_num_in_range_r2( r->right, low, hi, r->val);
-    }
+    return 1 + bst_num_gte( r->left, low) + bst_num_lte( r->right, hi);
   }
 }
 
 int bst_num_in_range( BST_PTR t, int low, int hi){
-  /*
+  
   if( t->root != NULL){
     int realTest =  bst_num_in_range_r( t->root, low, hi);
     printf("Long(er) NIR: %d\n", realTest);
   }
-  */
-
-  if( t->root == NULL) return -1;
-  else if( t->root->val >= low && t->root->val <= hi)
-    return 1 + bst_num_in_range_r2( t->root->left, low, hi, t->root->val)
-      + bst_num_in_range_r2( t->root->right, low, hi, t->root->val);
-  else
-    return bst_num_in_range_r2( t->root->left, low, hi, t->root->val)
-      + bst_num_in_range_r2( t->root->right, low, hi, t->root->val);
   
+  if( t->root == NULL) return -1;
+  else return bst_num_in_range_r2( t->root, low, hi);
 }
 //END num in range
 
@@ -451,8 +539,6 @@ int *bst_extract_range( BST_PTR t, int low, int hi, int *num){
   }
 }
 //END extract range
-
-
 
 
 

@@ -12,22 +12,36 @@ For each of the TODOs below, select one of the following:
     Feel free to add any comments you feel are relevant to 
     the grading process.
 
+**** Comments:
+  My solution does not appear to have any memory leaks.
+  The size balance capability should work. I have tested it
+  by adding 3000 random values which resulted in no leaks and
+  apparently correct distribution. The only part my addition *might* fail
+  are in the event of empty trees.
 
 (1) iterative version of insert
+    (i)  I completed it and am confident in correctness
 
 (2) Modified data structures and necessary functions
     to support bst_size in constant time.
+    (i)  I completed it and am confident in correctness
 
 (3) Completed the post-order printing function enabling
     visualization of the tree.
+    (i)  I completed it and am confident in correctness
 
 (4) Completed bst_ith_smallest function
+    (i)  I completed it and am confident in correctness
 
 (5) Completed bst_num_in_range function
+    (i)  I completed it and am confident in correctness
 
 (6) Completed bst_extract_range function
+    (i)  I completed it and am confident in correctness
 
 (7) Completed size-balanced capability (bonus)
+    (ii) I wrote code for it, but not sure it works all of
+         the time. (PERHAPS EDGE CASES)
 
 
 
